@@ -1,8 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <limits>
-#include <iostream>
-using namespace std;
+
 QT_CHARTS_USE_NAMESPACE
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -51,7 +50,7 @@ void MainWindow::on_openFileButton_clicked() {
     fread(&header, sizeof(header), 1, file);
     long numberOfSamples = (8 * header.Subchunk2Size) / (header.NumChannels * header.BitsPerSample);
     buffor.resize(numberOfSamples);
-    fread(&buffor[0], sizeof(vector<short>::value_type), buffor.size(),file);
+    fread(&buffor[0], sizeof(std::vector<short>::value_type), buffor.size(),file);
     buffor.resize((2, pow(2,ceil(log(numberOfSamples)/log(2)))));
     data.resize(buffor.size());
     fclose(file);
@@ -114,9 +113,10 @@ void MainWindow::on_rsaButton_clicked() {
 void MainWindow::on_saveAndPlayButton_clicked()
 {
     QString name = ui->fileNameBox->toPlainText();
+    if(name=="") name = "naprzyszloscpodajnazwe.wav";
     file = fopen(name.toUtf8(), "wb");
     fwrite(&header, sizeof(header), 1, file);
-    fwrite(&buffor[0], sizeof(vector<short>::value_type), buffor.size(),file);
+    fwrite(&buffor[0], sizeof(std::vector<short>::value_type), buffor.size(),file);
     fclose(file);
     player = new QMediaPlayer;
     player->setMedia(QUrl::fromLocalFile(QFileInfo(name).absoluteFilePath()));

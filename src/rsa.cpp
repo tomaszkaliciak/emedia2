@@ -1,4 +1,4 @@
-#include "rsa.h"
+#include "../inc/rsa.h"
 #include <cmath>
 #include <iostream>
 
@@ -65,8 +65,7 @@ void RSA::calculatePrivateKey() {
     else d = 0;
 }
 
-// zwraca wartość (base^exp) % mod\
-unsigned long powerModulo();
+// zwraca wartość (base^exp) % mod
 unsigned long RSA::powerModulo(unsigned long a, unsigned long b, unsigned long c) {
     unsigned long n, *pows, *indexes, indexCounter = 0, searchBit = 1, partialMul = 1;
     n = floor(log2(b)) + 1;

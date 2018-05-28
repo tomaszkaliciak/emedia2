@@ -1,4 +1,4 @@
-#include "plot.h"
+#include "../inc/plot.h"
 #include "ui_plot.h"
 
 Plot::Plot(QChartView *parent) :

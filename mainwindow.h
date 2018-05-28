@@ -16,8 +16,8 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QMediaPlayer>
-#include "plot.h"
-#include "rsa.h"
+#include "inc/plot.h"
+#include "inc/rsa.h"
 
 typedef std::complex<double> Complex;
 typedef std::valarray<Complex> CArray;
