@@ -17,7 +17,6 @@ Plot::Plot(QChart* plt,QChartView *parent) :
 }
 
 
-
 Plot::~Plot()
 {
     delete ui;

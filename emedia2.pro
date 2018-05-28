@@ -29,11 +29,13 @@ CONFIG += c++14
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    plot.cpp
+    plot.cpp \
+    rsa.cpp
 
 HEADERS += \
         mainwindow.h \
-    plot.h
+    plot.h \
+    rsa.h
 
 FORMS += \
         mainwindow.ui \

@@ -16,7 +16,6 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QMediaPlayer>
-#define BUFSIZE 512*2*2*2*2*2*2*2*2*2
 #include "plot.h"
 
 typedef std::complex<double> Complex;
@@ -70,7 +69,7 @@ private:
     Ui::MainWindow *ui;
     WavHeader header;
     FILE *file;
-    short buffor[BUFSIZE]; // bufor do wczytywania danych
+    std::vector<short> buffor;
     CArray data; // tablica przechowujaca liczby zespolone
     std::vector <double> amplitude; // do aplitudy po fft
     std::vector<double> freq;  // wektor czestotliwosci

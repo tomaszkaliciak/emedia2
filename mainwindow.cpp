@@ -32,74 +32,7 @@ void fft(CArray& x) {
 // http://soundfile.sapp.org/doc/WaveFormat/
 
 
-int gcd(unsigned long long a,unsigned long long int b) {
-    int tmp;
-    while (b != 0)  {
-      tmp = b;
-      b = a % b;
-      a = tmp;
-    }
-    return a;
-}
 
-/* Rozszerzony Algorytm Euklidesa.
-https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm
-*/
-int egcd(unsigned long long e, unsigned long long fi) {
-    long d = 0;
-    long x1 = 0;
-    long x2 = 1;
-    long y1 = 1;
-    long temp = fi;
-
-    while (e > 0) {
-        int temp1 = temp/e;
-        int temp2 = temp - temp1 * e;
-        temp = e;
-        e = temp2;
-
-        int x = x2- temp1* x1;
-        int y = d - temp1 * y1;
-
-        x2 = x1;
-        x1 = x;
-        d = y1;
-        y1 = y;
-    }
-    if (temp == 1) {
-        return d + fi;
-    }
-    else return 0;
-}
-
-// zwraca wartość (base^exp) % mod
-unsigned long long powerModulo(unsigned long long a, unsigned long long b, unsigned long long c) {
-    unsigned long long n, *pows, *indexes, indexCounter = 0, searchBit = 1, partialMul = 1;
-    n = floor(log2(b)) + 1;
-    pows = new unsigned long long[n];
-    indexes = new unsigned long long[n];
-    pows[0] = a % c;
-    for (int i = 1; i < n; i++) {
-        pows[i] = (pows[i - 1] * pows[i - 1]) % c;
-    }
-
-
-    for (int i = 0; i < n; i++) {
-        int index = b & searchBit;
-        if (index != 0) {
-            indexes[indexCounter] = floor(log2(index));
-            indexCounter++;
-        }
-        searchBit = searchBit << 1;
-    }
-
-    for (int i = 0; i < indexCounter; i++) {
-        partialMul = (partialMul * pows[indexes[i]]) % c;
-    }
-    delete[] pows;
-    delete[] indexes;
-    return partialMul % c;
-}
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -107,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    data.resize(BUFSIZE);
 }
 
 MainWindow::~MainWindow()
@@ -123,7 +55,10 @@ void MainWindow::on_pushButton_clicked()
                                    "Music file (*.wav)");
     file = fopen(filename.toUtf8(), "rb");
     fread(&header, sizeof(header), 1, file);
-    fread(buffor, sizeof(buffor), 1, file);
+    long numberOfSamples = (8 * header.Subchunk2Size) / (header.NumChannels * header.BitsPerSample);
+    buffor.resize(numberOfSamples);
+    data.resize(numberOfSamples);
+    fread(&buffor[0], sizeof(vector<short>::value_type), buffor.size(),file);
     fclose(file);
     filepath = filename;
 }
@@ -135,7 +70,7 @@ void MainWindow::on_pushButton_2_clicked()
     amplitude.clear();
     freq.clear();
 
-    for(uint i = 0; i < BUFSIZE; ++i) {
+    for(uint i = 0; i < buffor.size(); ++i) {
         int sample = buffor[i];
         double nSample = sample; // normalizacja danych do zakresu (-1,1)
         data[i] = Complex(nSample);      // dodaj do tablicy liczb zespolonych
@@ -148,7 +83,7 @@ void MainWindow::on_pushButton_2_clicked()
     QLineSeries *series = new QLineSeries();
     for(uint i = 0; i < data.size()/2; ++i) {
         amplitude.push_back(real(data[i])); // kopiuj do wektora czesc rzeczywista
-        freq.push_back((i * header.SampleRate) / (double)BUFSIZE);
+        freq.push_back((i * header.SampleRate) / (double)data.size());
         series->append(freq[i],amplitude[i]);
     }
     QChart *chart = new QChart();
@@ -184,14 +119,9 @@ void MainWindow::on_pushButton_3_clicked()
     while (gcd(fi,e) > 1 && e < n) {
         ++e;
     }
-    std::cout << "ORG: " << std::endl;
-    for(uint i = 0; i < BUFSIZE; ++i) {
-        std::cout << buffor[i] << std::endl;
-    }
 
-    std::cout << "Zaszyfrowane: " << std::endl;
     short  r;
-    for(uint i = 0; i < BUFSIZE; ++i) {
+    for(uint i = 0; i < data.size(); ++i) {
         if(buffor[i] < 0) {
              r = -1 * buffor[i];
              r = powerModulo(r,e,n);
@@ -202,7 +132,6 @@ void MainWindow::on_pushButton_3_clicked()
              r = powerModulo(buffor[i],e,n);
              buffor[i] = r;
         }
-         std::cout << buffor[i] << std::endl;
     }
 }
 
@@ -218,7 +147,7 @@ void MainWindow::on_pushButton_5_clicked()
     QLineSeries *series = new QLineSeries();
     for(uint i = 0; i < data.size()/2; ++i) {
         amplitude.push_back(real(data[i])); // kopiuj do wektora czesc rzeczywista
-        freq.push_back((i * header.SampleRate) / (double)BUFSIZE);
+        freq.push_back((i * header.SampleRate) / (double)data.size());
         series->append(freq[i],amplitude[i]);
     }
     QChart *chart = new QChart();
@@ -234,10 +163,10 @@ void MainWindow::on_pushButton_6_clicked()
 {
     file = fopen("nowy.wav", "wb");
     fwrite(&header, sizeof(header), 1, file);
-    int tmp;
-    for(uint i = 0; i < amplitude.size(); ++i) {
-        tmp=amplitude[i];
-        fwrite(&tmp,sizeof(int),1,file);
+    short tmp;
+    for(uint i = 0; i < buffor.size(); ++i) {
+        tmp=buffor[i];
+        fwrite(&tmp,sizeof(short),1,file);
     }
     fclose(file);
     player = new QMediaPlayer;
@@ -265,17 +194,15 @@ void MainWindow::on_pushButton_7_clicked()
     int d = egcd(e,fi);
     unsigned long long oper;
     short r;
-    for(uint i = 0; i < BUFSIZE; ++i) {
+    for(uint i = 0; i < buffor.size(); ++i) {
         if(buffor[i] < 0) {
              r = -1 * buffor[i];
              r = powerModulo(r,d,n);
-             r = -1 * r;
+             buffor[i] = -1 * r;
         }
         else {
-             r = powerModulo(buffor[i],d,n);
+             buffor[i] = powerModulo(buffor[i],d,n);
         }
-        amplitude.push_back(r);      // dodaj do tablicy liczb zespolonych
-        std::cout <<  r << std::endl;
     }
 
 }
