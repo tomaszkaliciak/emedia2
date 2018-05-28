@@ -19,6 +19,7 @@
 #include "inc/plot.h"
 #include "inc/rsa.h"
 
+const double PI = 3.141592653589793238460;
 typedef std::complex<double> Complex;
 typedef std::valarray<Complex> CArray;
 
@@ -66,12 +67,12 @@ private:
     WavHeader header;
     FILE *file;
     std::vector<short> buffor;
-    CArray data; // tablica przechowujaca liczby zespolone
-    std::vector <double> amplitude; // do aplitudy po fft
-    std::vector<double> freq;  // wektor czestotliwosci
+    CArray data;
+    std::vector <double> amplitude;
+    std::vector<double> freq;
     QMediaPlayer* player;
     QString filepath;
-    RSA rsa = RSA(1237,17);
+    RSA rsa = RSA(151,157);
 };
 
 #endif // MAINWINDOW_H

@@ -6,7 +6,6 @@ RSA::RSA(unsigned long prime1, unsigned long prime2): p(prime1),q(prime2) {
     n = p * q;
     fi = (p-1) * (q-1);
     calculatePublicKey();
-
     calculatePrivateKey();
 }
 
@@ -29,69 +28,42 @@ void RSA::calculatePublicKey() {
         }
     e = b;
 }
-/* Rozszerzony Algorytm Euklidesa.
-https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm
-*/
 
+// https://rosettacode.org/wiki/Modular_inverse#C.2B.2B
 void RSA::calculatePrivateKey() {
-    unsigned long ee = e;
-    unsigned long fii = fi;
-    unsigned long w = 0;
-    unsigned long x = 0;
-    unsigned long y = 0;
-    unsigned long x1 = 0;
-    unsigned long x2 = 1;
-    unsigned long y1 = 1;
-    unsigned long temp = fii;
-    unsigned long temp1;
-    unsigned long temp2;
-    while (ee > 0) {
-        temp1 = temp/ee;
-        temp2 = temp - temp1 * ee;
-        temp = ee;
-        ee = temp2;
+    long a = e;
+    long b = fi;
+    long b0 = b, t, q;
+    long x0 = 0, x1 = 1;
 
-        x = x2- temp1* x1;
-        y = w - temp1 * y1;
+    if (b == 1) {
+        d =1;
+        return;
+    }
 
-        x2 = x1;
-        x1 = x;
-        w = y1;
-        y1 = y;
+    while (a > 1) {
+        q = a / b;
+        t = b, b = a % b, a = t;
+        t = x0, x0 = x1 - q * x0, x1 = t;
     }
-    if (temp == 1) {
-        d = w + fi;
-    }
-    else d = 0;
+
+    if (x1 < 0) x1 += b0;
+    d = x1;
 }
 
 // zwraca wartość (base^exp) % mod
+// https://www.topcoder.com/community/data-science/data-science-tutorials/primality-testing-non-deterministic-algorithms/
 unsigned long RSA::powerModulo(unsigned long a, unsigned long b, unsigned long c) {
-    unsigned long n, *pows, *indexes, indexCounter = 0, searchBit = 1, partialMul = 1;
-    n = floor(log2(b)) + 1;
-    pows = new unsigned long[n];
-    indexes = new unsigned long[n];
-    pows[0] = a % c;
-    for (int i = 1; i < n; i++) {
-        pows[i] = (pows[i - 1] * pows[i - 1]) % c;
-    }
-
-
-    for (int i = 0; i < n; i++) {
-        int index = b & searchBit;
-        if (index != 0) {
-            indexes[indexCounter] = floor(log2(index));
-            indexCounter++;
+    unsigned long result = 1;
+    while (b) {
+        if (b % 2) {
+            result = (result * a) % c;
         }
-        searchBit = searchBit << 1;
-    }
 
-    for (int i = 0; i < indexCounter; i++) {
-        partialMul = (partialMul * pows[indexes[i]]) % c;
+        a = (a * a) % c;
+        b /= 2;
     }
-    delete[] pows;
-    delete[] indexes;
-    return partialMul % c;
+    return result;
 }
 
 long RSA::encode(long msg) {

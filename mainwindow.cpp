@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <limits>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -14,10 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow() {
     delete ui;
 }
-
-const double PI = 3.141592653589793238460;
-
-
 
 void fft(CArray& x) {
     const size_t N = x.size();
@@ -46,15 +41,18 @@ void MainWindow::on_openFileButton_clicked() {
                                    tr("Wybierz plik .wav",
                                    "~/"),
                                    "Music file (*.wav)");
+
     file = fopen(filename.toUtf8(), "rb");
     fread(&header, sizeof(header), 1, file);
+
     long numberOfSamples = (8 * header.Subchunk2Size) / (header.NumChannels * header.BitsPerSample);
     buffor.resize(numberOfSamples);
+    data.resize(numberOfSamples);
+
     fread(&buffor[0], sizeof(std::vector<short>::value_type), buffor.size(),file);
-    buffor.resize((2, pow(2,ceil(log(numberOfSamples)/log(2)))));
-    data.resize(buffor.size());
+
     fclose(file);
-    filepath = filename;
+    filepath = filename; //zapisz nazwę pliku, aby PLAY ORG wiedzial co zagrac
 }
 
 void MainWindow::on_plotButton_clicked() {
@@ -62,9 +60,9 @@ void MainWindow::on_plotButton_clicked() {
     freq.clear();
 
     double nSample;
+
     for(uint i = 0; i < buffor.size(); ++i) {
-        // normalizacja danych do zakresu (-1,1)
-        nSample = buffor[i]/32768.0;
+        nSample = buffor[i]/32768.0; // normalizacja danych do zakresu (-1,1)
         data[i] = Complex(nSample);  // dodaj do tablicy liczb zespolonych
     }
 
@@ -85,6 +83,7 @@ void MainWindow::on_plotButton_clicked() {
     chart->addSeries(series);
     chart->createDefaultAxes();
     chart->setTitle("FFT");
+
     Plot* plot = new Plot(chart);
     plot->show();
 }
@@ -109,15 +108,17 @@ void MainWindow::on_rsaButton_clicked() {
         }
     }
 }
-//fileNameBox
+
 void MainWindow::on_saveAndPlayButton_clicked()
 {
     QString name = ui->fileNameBox->toPlainText();
     if(name=="") name = "naprzyszloscpodajnazwe.wav";
+
     file = fopen(name.toUtf8(), "wb");
     fwrite(&header, sizeof(header), 1, file);
     fwrite(&buffor[0], sizeof(std::vector<short>::value_type), buffor.size(),file);
     fclose(file);
+
     player = new QMediaPlayer;
     player->setMedia(QUrl::fromLocalFile(QFileInfo(name).absoluteFilePath()));
     player->setVolume(100);
