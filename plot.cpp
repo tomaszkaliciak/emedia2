@@ -13,7 +13,6 @@ Plot::Plot(QChart* plt,QChartView *parent) :
     ui(new Ui::Plot)
 {
     ui->setupUi(this);
-    p = plt;
     setChart(plt);
 }
 
@@ -21,5 +20,4 @@ Plot::Plot(QChart* plt,QChartView *parent) :
 Plot::~Plot()
 {
     delete ui;
-    delete p;
 }

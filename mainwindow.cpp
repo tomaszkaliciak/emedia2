@@ -51,8 +51,9 @@ void MainWindow::on_openFileButton_clicked() {
     fread(&header, sizeof(header), 1, file);
     long numberOfSamples = (8 * header.Subchunk2Size) / (header.NumChannels * header.BitsPerSample);
     buffor.resize(numberOfSamples);
-    data.resize(numberOfSamples);
     fread(&buffor[0], sizeof(vector<short>::value_type), buffor.size(),file);
+    buffor.resize((2, pow(2,ceil(log(numberOfSamples)/log(2)))));
+    data.resize(buffor.size());
     fclose(file);
     filepath = filename;
 }
@@ -64,7 +65,7 @@ void MainWindow::on_plotButton_clicked() {
     double nSample;
     for(uint i = 0; i < buffor.size(); ++i) {
         // normalizacja danych do zakresu (-1,1)
-        nSample = buffor[i]/std::numeric_limits<double>::max();
+        nSample = buffor[i]/32768.0;
         data[i] = Complex(nSample);  // dodaj do tablicy liczb zespolonych
     }
 
