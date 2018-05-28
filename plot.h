@@ -14,7 +14,7 @@ class Plot;
 class Plot : public QChartView
 {
     Q_OBJECT
-
+    QChart*p;
 public:
     explicit Plot(QChartView *parent = 0);
     Plot(QChart *plt, QChartView *parent = 0);

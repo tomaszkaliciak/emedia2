@@ -17,10 +17,12 @@
 #include <QLineSeries>
 #include <QMediaPlayer>
 #include "plot.h"
+#include "rsa.h"
 
 typedef std::complex<double> Complex;
 typedef std::valarray<Complex> CArray;
 
+// http://soundfile.sapp.org/doc/WaveFormat/
 
 struct WavHeader {
     char chunkID[4];
@@ -45,25 +47,19 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void f();
 private slots:
-    void on_pushButton_clicked();
+    void on_openFileButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_plotButton_clicked();
 
-    void on_pushButton_4_clicked();
+    void on_playOrgButton_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_rsaButton_clicked();
 
-    void on_pushButton_5_clicked();
-
-    void on_pushButton_6_clicked();
-
-    void on_pushButton_7_clicked();
+    void on_saveAndPlayButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -75,6 +71,7 @@ private:
     std::vector<double> freq;  // wektor czestotliwosci
     QMediaPlayer* player;
     QString filepath;
+    RSA rsa = RSA(1237,17);
 };
 
 #endif // MAINWINDOW_H

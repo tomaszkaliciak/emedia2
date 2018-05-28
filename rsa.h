@@ -9,9 +9,9 @@ private:
     unsigned long fi;
     unsigned long e;
     unsigned long d;
-    unsigned long calculatePublicKey();
-    unsigned long calculatePrivateKey();
-    unsigned long powerModulo(long a, long b, long c);
+    void calculatePublicKey();
+    void calculatePrivateKey();
+    unsigned long powerModulo(unsigned long a, unsigned long b, unsigned long c);
 public:
     RSA(unsigned long p, unsigned long q);
     unsigned long getPublicKey();

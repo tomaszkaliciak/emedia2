@@ -1,16 +1,16 @@
 #include "rsa.h"
 #include <cmath>
+#include <iostream>
 
 RSA::RSA(unsigned long prime1, unsigned long prime2): p(prime1),q(prime2) {
     n = p * q;
     fi = (p-1) * (q-1);
-    e = calculatePublicKey();
-    d = calculatePrivateKey();
+    calculatePublicKey();
+
+    calculatePrivateKey();
 }
 
-unsigned long RSA::calculatePublicKey() {
-    unsigned long a = n/2;
-    unsigned long b = fi;
+unsigned long gcd(unsigned long a, unsigned long b) {
     unsigned long tmp;
     while (b != 0)  {
       tmp = b;
@@ -20,41 +20,49 @@ unsigned long RSA::calculatePublicKey() {
     return a;
 }
 
+
+void RSA::calculatePublicKey() {
+    unsigned long a = fi;
+    unsigned long b = n/2;
+    while (gcd(a,b) > 1 && b < n) {
+            ++b;
+        }
+    e = b;
+}
 /* Rozszerzony Algorytm Euklidesa.
 https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm
 */
 
-unsigned long RSA::calculatePrivateKey() {
+void RSA::calculatePrivateKey() {
     unsigned long ee = e;
     unsigned long fii = fi;
-
-    unsigned long d = 0;
+    unsigned long w = 0;
+    unsigned long x = 0;
+    unsigned long y = 0;
     unsigned long x1 = 0;
     unsigned long x2 = 1;
     unsigned long y1 = 1;
     unsigned long temp = fii;
     unsigned long temp1;
     unsigned long temp2;
-    unsigned long x;
-    unsigned long y;
-    while (e > 0) {
-        temp1 = temp/e;
+    while (ee > 0) {
+        temp1 = temp/ee;
         temp2 = temp - temp1 * ee;
         temp = ee;
         ee = temp2;
 
         x = x2- temp1* x1;
-        y = d - temp1 * y1;
+        y = w - temp1 * y1;
 
         x2 = x1;
         x1 = x;
-        d = y1;
+        w = y1;
         y1 = y;
     }
     if (temp == 1) {
-        return d + fi;
+        d = w + fi;
     }
-    else return 0;
+    else d = 0;
 }
 
 // zwraca wartość (base^exp) % mod\
@@ -104,11 +112,11 @@ long RSA::decode(long hash) {
     long msg;
     if(hash < 0) {
         hash *= -1;
-        msg = powerModulo(hash,e,n);
+        msg = powerModulo(hash,d,n);
         msg *= -1;
     }
     else {
-        msg = powerModulo(hash,e,n);
+        msg = powerModulo(hash,d,n);
     }
     return msg;
 }
