@@ -45,7 +45,7 @@ void MainWindow::on_openFileButton_clicked() {
     file = fopen(filename.toUtf8(), "rb");
     fread(&header, sizeof(header), 1, file);
 
-    long numberOfSamples = (8 * header.Subchunk2Size) / (header.NumChannels * header.BitsPerSample);
+    long numberOfSamples = (8 * header.Subchunk2Size) / (header.BitsPerSample);
     buffor.resize(numberOfSamples);
     data.resize(numberOfSamples);
 
