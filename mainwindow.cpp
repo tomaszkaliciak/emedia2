@@ -47,7 +47,7 @@ void MainWindow::on_openFileButton_clicked() {
 
     long numberOfSamples = (8 * header.Subchunk2Size) / (header.BitsPerSample);
     buffor.resize(numberOfSamples);
-    data.resize(numberOfSamples);
+    data.resize(numberOfSamples/header.NumChannels);
 
     fread(&buffor[0], sizeof(std::vector<short>::value_type), buffor.size(),file);
 
@@ -58,12 +58,11 @@ void MainWindow::on_openFileButton_clicked() {
 void MainWindow::on_plotButton_clicked() {
     amplitude.clear();
     freq.clear();
-
     double nSample;
 
-    for(uint i = 0; i < buffor.size(); ++i) {
+    for(uint i = 0; i < buffor.size(); i+=header.NumChannels) {
         nSample = buffor[i]/32768.0; // normalizacja danych do zakresu (-1,1)
-        data[i] = Complex(nSample);  // dodaj do tablicy liczb zespolonych
+        data[i/header.NumChannels] = Complex(nSample);  // dodaj do tablicy liczb zespolonych
     }
 
     fft(data);
